@@ -36,6 +36,7 @@ pub fn reformat_valid_name(name: &str) -> String {
 /// -- text/ # contains all text files such as statement, tutorials, and testcases discriptions
 /// -- bin/ # contains all binary compiled from the source files
 pub fn create_problem_dir(path: &Path, config: &ProblemConfig) -> Result<(), Box<dyn Error>> {
+    create_dir(path)?;
     create_dir(path.join("src"))?;
     create_dir(path.join("src").join("files"))?;
     create_dir(path.join("src").join("solutions"))?;
@@ -46,14 +47,15 @@ pub fn create_problem_dir(path: &Path, config: &ProblemConfig) -> Result<(), Box
     create_dir(path.join("bin"))?;
 
     let file = OpenOptions::new()
+        .create(true)
         .write(true)
         .open(path.join("problem_config.json"))?;
     Ok(config.save_to_file(file)?)
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ProblemConfig {
-    pub name: String,
+    pub title: String,
     pub time: f32,
     pub tags: Vec<String>,
     pub testcases: Vec<Testcase>,
@@ -73,7 +75,7 @@ impl ProblemConfig {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Testcase {
     pub input_path: PathBuf,
     pub output_path: PathBuf,
@@ -81,7 +83,7 @@ pub struct Testcase {
     pub sample: bool,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SourceFile {
     pub source: PathBuf,
     pub build_command: String,
@@ -106,14 +108,14 @@ impl SourceFile {
 }
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Verdict {
     AC,
     TLE,
     WA
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Solution {
     sourcefile: SourceFile,
     verdict: Verdict

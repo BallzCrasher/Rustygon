@@ -2,6 +2,7 @@ use crate::core::{ProblemConfig, SourceFile};
 use crate::core::{is_valid_problem_name, reformat_valid_name, create_problem_dir};
 
 use std::env::current_dir;
+use std::io::{stdout, Write};
 use std::fs::{File, OpenOptions};
 use std::path::{Path, PathBuf};
 use std::{fmt::Debug, str::FromStr};
@@ -16,9 +17,9 @@ pub enum Command {
     Info,
 }
 
-pub fn handle_command(command: Command) {
+pub fn handle_command(command: Option<Command>) {
     match command {
-        Command::New { name } => {
+        Some(Command::New { name }) => {
             create_problem_command(name);
         }
         _ => unimplemented!(),
@@ -43,18 +44,28 @@ where
 pub fn create_problem_command(name: String) {
     assert!(is_valid_problem_name(&name));
     let reformated_name = reformat_valid_name(&name);
-    print!("Problem Name (Default is {reformated_name}): ");
-    let name = read_input(reformated_name);
-    print!("Max Time in Seconds (Default is 1.0: ");
+
+    print!("Problem Title (Default is {reformated_name}): ");
+    stdout().flush().unwrap();
+    let title = read_input(reformated_name);
+
+    print!("Max Time in Seconds (Default is 1.0): ");
+    stdout().flush().unwrap();
     let time = read_input(1.0);
-    print!("Tags Saperated by commas (Default is 1.0: ");
+
+    print!("Tags Saperated by commas (Default is Empty): ");
+    stdout().flush().unwrap();
     let tags = read_input(String::new());
-    let tags: Vec<String> = tags.split(',').map(str::trim).map(str::to_string).collect();
+    let tags: Vec<String> = tags
+        .split(',')
+        .map(str::trim)
+        .map(str::to_string)
+        .collect();
 
     let path = current_dir().unwrap().join(&name);
 
     let config = ProblemConfig {
-        name,
+        title,
         time,
         tags,
         sources: Vec::new(),
@@ -63,6 +74,8 @@ pub fn create_problem_command(name: String) {
         checker: None,
         validator: None,
     };
+
+    println!("{config:?}");
 
     create_problem_dir(&path, &config).unwrap();
 }

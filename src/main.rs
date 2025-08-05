@@ -2,7 +2,7 @@ use clap::Parser;
 use serde::{Serialize, Deserialize};
 use std::path::PathBuf;
 use std::env::current_dir;
-use rustygon::cli::Command;
+use rustygon::cli::{Command, handle_command};
 
 
 #[derive(Parser)]
@@ -38,4 +38,6 @@ fn main() {
     //    true => Config::load_from_json(File::open(config_path)?)?,
     //    false => Config::default(),
     //};
+    
+    handle_command(args.command);
 }
