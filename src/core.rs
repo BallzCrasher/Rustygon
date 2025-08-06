@@ -38,7 +38,7 @@ pub fn reformat_valid_name(name: &str) -> String {
 pub fn create_problem_dir(path: &Path, config: &ProblemConfig) -> Result<(), Box<dyn Error>> {
     create_dir(path)?;
     create_dir(path.join("src"))?;
-    create_dir(path.join("src").join("files"))?;
+    create_dir(path.join("src").join("sources"))?;
     create_dir(path.join("src").join("solutions"))?;
     create_dir(path.join("testcases"))?;
     create_dir(path.join("testcases").join("input"))?;

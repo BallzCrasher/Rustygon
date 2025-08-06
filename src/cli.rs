@@ -2,7 +2,7 @@ use crate::core::{create_problem_dir, is_valid_problem_name, reformat_valid_name
 use crate::core::{ProblemConfig, SourceFile};
 
 use std::env::current_dir;
-use std::fs::{File, OpenOptions};
+use std::fs::{copy, File, OpenOptions};
 use std::io::{stdout, Write};
 use std::path::{Path, PathBuf};
 use std::{fmt::Debug, str::FromStr};
@@ -22,9 +22,9 @@ pub enum Command {
 
 #[derive(Subcommand)]
 pub enum Addition {
-    Statement, 
+    Statement,
     Solution,
-    File,
+    Source { path: PathBuf },
 }
 
 pub fn handle_command(command: Option<Command>) {
@@ -35,7 +35,10 @@ pub fn handle_command(command: Option<Command>) {
         Some(Command::Info) => {
             print_problem_info();
         }
-        None => {},
+        Some(Command::Add(Addition::Source { path })) => {
+            add_source_command(&path);
+        }
+        None => {}
         _ => unimplemented!(),
     }
 }
@@ -107,4 +110,31 @@ fn get_current_problem_directory() -> PathBuf {
             .expect("Reached Maximum parent depth and didn't find problem_config.json");
     }
     return path.to_owned();
+}
+
+fn add_source_command(path: &Path) {
+    let cpd = get_current_problem_directory();
+    let config_file = File::open(cpd.join("problem_config.json")).unwrap();
+    let mut config = ProblemConfig::from_file(config_file).unwrap();
+
+    if path.exists() && path.is_file() {
+        copy(path, cpd.join("src/sources")).unwrap();
+    } else if let Some(name) = path.file_name() {
+        let name = cpd.join("src/sources").join(name);
+        File::create(name).unwrap();
+    } else {
+        eprintln!("Invalid input.");
+        return;
+    }
+
+    config.sources.push(SourceFile::from_filename(
+        PathBuf::from(path.file_name().unwrap()).as_path(),
+    ));
+
+    let config_file = File::options()
+        .write(true)
+        .open(cpd.join("problem_config.json"))
+        .unwrap();
+    config.save_to_file(config_file).unwrap();
+    println!("Done");
 }
