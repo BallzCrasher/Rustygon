@@ -13,8 +13,18 @@ use clap::Subcommand;
 pub enum Command {
     /// Creates new problem
     New { name: String },
+    /// Adds a component to the problem
+    #[command(subcommand)]
+    Add(Addition),
     /// Info
     Info,
+}
+
+#[derive(Subcommand)]
+pub enum Addition {
+    Statement, 
+    Solution,
+    File,
 }
 
 pub fn handle_command(command: Option<Command>) {
@@ -25,7 +35,8 @@ pub fn handle_command(command: Option<Command>) {
         Some(Command::Info) => {
             print_problem_info();
         }
-        None => {} //_ => unimplemented!(),
+        None => {},
+        _ => unimplemented!(),
     }
 }
 
