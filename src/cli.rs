@@ -22,6 +22,9 @@ pub fn handle_command(command: Option<Command>) {
         Some(Command::New { name }) => {
             create_problem_command(name);
         }
+        Some(Command::Info) => {
+            print_problem_info();
+        }
         _ => unimplemented!(),
     }
 }
@@ -80,9 +83,18 @@ pub fn create_problem_command(name: String) {
     create_problem_dir(&path, &config).unwrap();
 }
 
-fn get_current_problem_directory(mut cwd: &Path) -> &Path {
-    while !cwd.join("problem_config.json").exists() {
-        cwd = cwd
+pub fn print_problem_info() {
+    let problem_path = get_current_problem_directory(current_dir().unwrap());
+    let problem_config_path = problem_path.join("problem_config.json");
+    let problem_config = ProblemConfig::from_file(File::open(problem_config_path).unwrap());
+
+    println!("{:?}", problem_config);
+}
+
+fn get_current_problem_directory(cwd: PathBuf) -> PathBuf {
+    let mut path = cwd.as_path();
+    while !path.join("problem_config.json").exists() {
+        path = path
             .parent()
             .expect("Reached Maximum parent depth and didn't find problem_config.json");
     }
