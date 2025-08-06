@@ -25,7 +25,8 @@ pub fn handle_command(command: Option<Command>) {
         Some(Command::Info) => {
             print_problem_info();
         }
-        _ => unimplemented!(),
+        None => {}
+        //_ => unimplemented!(),
     }
 }
 

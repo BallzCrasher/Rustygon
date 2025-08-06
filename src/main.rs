@@ -6,7 +6,7 @@ use rustygon::cli::{Command, handle_command};
 
 
 #[derive(Parser)]
-#[command(version, about, long_about = None)]
+#[command(version, about, long_about = None, arg_required_else_help=true)]
 pub struct Cli {
     // Sets a custom config file
     //#[arg(short, long, value_name = "FILE")]
@@ -38,6 +38,5 @@ fn main() {
     //    true => Config::load_from_json(File::open(config_path)?)?,
     //    false => Config::default(),
     //};
-    
     handle_command(args.command);
 }
