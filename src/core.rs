@@ -107,16 +107,15 @@ impl SourceFile {
     }
 }
 
-
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Verdict {
     AC,
     TLE,
-    WA
+    WA,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Solution {
     sourcefile: SourceFile,
-    verdict: Verdict
+    verdict: Verdict,
 }

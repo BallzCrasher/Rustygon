@@ -1,9 +1,8 @@
 use clap::Parser;
-use serde::{Serialize, Deserialize};
-use std::path::PathBuf;
+use rustygon::cli::{handle_command, Command};
+use serde::{Deserialize, Serialize};
 use std::env::current_dir;
-use rustygon::cli::{Command, handle_command};
-
+use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None, arg_required_else_help=true)]
@@ -11,7 +10,6 @@ pub struct Cli {
     // Sets a custom config file
     //#[arg(short, long, value_name = "FILE")]
     //pub config: Option<PathBuf>,
-
     /// Turn debugging information on
     #[arg(short, long, action = clap::ArgAction::Count)]
     pub debug: u8,
@@ -19,7 +17,6 @@ pub struct Cli {
     #[command(subcommand)]
     pub command: Option<Command>,
 }
-
 
 //#[derive(Default,Serialize, Deserialize)]
 //struct Config {

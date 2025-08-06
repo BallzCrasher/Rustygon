@@ -1,9 +1,9 @@
+use crate::core::{create_problem_dir, is_valid_problem_name, reformat_valid_name};
 use crate::core::{ProblemConfig, SourceFile};
-use crate::core::{is_valid_problem_name, reformat_valid_name, create_problem_dir};
 
 use std::env::current_dir;
-use std::io::{stdout, Write};
 use std::fs::{File, OpenOptions};
+use std::io::{stdout, Write};
 use std::path::{Path, PathBuf};
 use std::{fmt::Debug, str::FromStr};
 
@@ -25,8 +25,7 @@ pub fn handle_command(command: Option<Command>) {
         Some(Command::Info) => {
             print_problem_info();
         }
-        None => {}
-        //_ => unimplemented!(),
+        None => {} //_ => unimplemented!(),
     }
 }
 
@@ -60,11 +59,7 @@ pub fn create_problem_command(name: String) {
     print!("Tags Saperated by commas (Default is Empty): ");
     stdout().flush().unwrap();
     let tags = read_input(String::new());
-    let tags: Vec<String> = tags
-        .split(',')
-        .map(str::trim)
-        .map(str::to_string)
-        .collect();
+    let tags: Vec<String> = tags.split(',').map(str::trim).map(str::to_string).collect();
 
     let path = current_dir().unwrap().join(&name);
 
