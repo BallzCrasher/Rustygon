@@ -91,19 +91,20 @@ pub fn create_problem_command(name: String) {
 }
 
 pub fn print_problem_info() {
-    let problem_path = get_current_problem_directory(current_dir().unwrap());
+    let problem_path = get_current_problem_directory();
     let problem_config_path = problem_path.join("problem_config.json");
     let problem_config = ProblemConfig::from_file(File::open(problem_config_path).unwrap());
 
     println!("{:?}", problem_config);
 }
 
-fn get_current_problem_directory(cwd: PathBuf) -> PathBuf {
+fn get_current_problem_directory() -> PathBuf {
+    let cwd = current_dir().unwrap();
     let mut path = cwd.as_path();
     while !path.join("problem_config.json").exists() {
         path = path
             .parent()
             .expect("Reached Maximum parent depth and didn't find problem_config.json");
     }
-    return cwd;
+    return path.to_owned();
 }
