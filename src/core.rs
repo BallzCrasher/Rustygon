@@ -24,7 +24,7 @@ impl ProblemConfig {
     }
 
     pub fn save_to_file(&self, file: File) -> serde_json::Result<()> {
-        serde_json::to_writer(file, self)
+        serde_json::to_writer_pretty(file, self)
     }
 }
 
