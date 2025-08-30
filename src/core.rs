@@ -137,7 +137,7 @@ pub fn add_source(cpd: &Path, name: &str, from: Option<&Path>) -> Result<(), io:
     if let Some(path) = from {
         copy(path, &source_path)?;
     } else {
-        File::create(&source_path)?;
+        File::create_new(&source_path)?;
     }
 
     config.sources.push(SourceFile::from_filename(&source_path));
