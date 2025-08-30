@@ -7,7 +7,7 @@ use crate::core::{
 };
 
 use std::env::current_dir;
-use std::fs::{copy, File, OpenOptions};
+use std::fs::File;
 use std::io::{stdout, Write};
 use std::path::{Path, PathBuf};
 use std::{fmt::Debug, str::FromStr};
@@ -20,16 +20,16 @@ pub enum Command {
     New { name: String },
     /// Adds a component to the problem
     #[command(subcommand)]
-    Add(Addition),
+    Add(Element),
     /// Info
     Info,
 }
 
 #[derive(Subcommand)]
-pub enum Addition {
+pub enum Element {
     Statement,
     Solution,
-    Source { path: PathBuf },
+    Source { path: PathBuf }, // TODO: make it path: name
 }
 
 pub fn handle_command(command: Option<Command>) {
@@ -40,7 +40,7 @@ pub fn handle_command(command: Option<Command>) {
         Some(Command::Info) => {
             print_problem_info();
         }
-        Some(Command::Add(Addition::Source { path })) => {
+        Some(Command::Add(Element::Source { path })) => {
             add_source_command(&path);
         }
         None => {}
