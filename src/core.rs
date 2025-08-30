@@ -144,6 +144,7 @@ pub fn add_source(cpd: &Path, name: &str, from: Option<&Path>) -> Result<(), io:
 
     let config_file = File::options()
         .write(true)
+        .truncate(true)
         .open(cpd.join("problem_config.json"))
         .unwrap();
     config.save_to_file(config_file)?;
