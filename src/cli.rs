@@ -1,6 +1,6 @@
 use crate::core::{
     add_source, create_problem_dir, is_valid_problem_name, reformat_valid_name, remove_source,
-    ProblemConfig,
+    ProblemConfig, Verdict, add_solution
 };
 
 use std::env::current_dir;
@@ -28,7 +28,11 @@ pub enum Command {
 #[derive(Subcommand)]
 pub enum Element {
     Statement,
-    Solution,
+    Solution {
+        path: PathBuf,
+        #[arg(value_enum)]
+        verdict: Option<Verdict>
+    },
     Source { path: PathBuf }, // TODO: make it path: name
 }
 
@@ -42,6 +46,9 @@ pub fn handle_command(command: Option<Command>) {
         }
         Some(Command::Add(Element::Source { path })) => {
             add_source_command(&path);
+        }
+        Some(Command::Add(Element::Solution { path, verdict })) => {
+            add_solution_command(&path, verdict);
         }
         Some(Command::Remove(Element::Source { path })) => {
             remove_source_command(&path);
@@ -144,5 +151,22 @@ fn add_source_command(path: &Path) {
 fn remove_source_command(path: &Path) {
     let cpd = get_current_problem_directory();
     remove_source(&cpd, path.file_name().unwrap().to_str().unwrap()).unwrap();
+    println!("Done");
+}
+
+fn add_solution_command(path: &Path, verdict: Option<Verdict>) {
+    let cpd = get_current_problem_directory();
+    let verdict = verdict.unwrap_or_default();
+
+    if path.exists() && path.is_file() {
+        let filename = path.file_name().unwrap().to_str().unwrap();
+        add_solution(&cpd, filename, Some(&path), verdict).unwrap();
+    } else if let Some(name) = path.file_name() {
+        add_solution(&cpd, name.to_str().unwrap(), None, verdict).unwrap();
+    } else {
+        eprintln!("Invalid input.");
+        return;
+    }
+
     println!("Done");
 }
