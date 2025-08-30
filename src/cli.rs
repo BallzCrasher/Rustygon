@@ -1,5 +1,6 @@
 use crate::core::{
-    add_source, create_problem_dir, is_valid_problem_name, reformat_valid_name, ProblemConfig,
+    add_source, create_problem_dir, is_valid_problem_name, reformat_valid_name, remove_source,
+    ProblemConfig,
 };
 
 use std::env::current_dir;
@@ -17,6 +18,9 @@ pub enum Command {
     /// Adds a component to the problem
     #[command(subcommand)]
     Add(Element),
+    /// Adds a component to the problem
+    #[command(subcommand)]
+    Remove(Element),
     /// Info
     Info,
 }
@@ -38,6 +42,9 @@ pub fn handle_command(command: Option<Command>) {
         }
         Some(Command::Add(Element::Source { path })) => {
             add_source_command(&path);
+        }
+        Some(Command::Remove(Element::Source { path })) => {
+            remove_source_command(&path);
         }
         None => {}
         _ => unimplemented!(),
@@ -126,5 +133,11 @@ fn add_source_command(path: &Path) {
         return;
     }
 
+    println!("Done");
+}
+
+fn remove_source_command(path: &Path) {
+    let cpd = get_current_problem_directory();
+    remove_source(&cpd, path.file_name().unwrap().to_str().unwrap()).unwrap();
     println!("Done");
 }

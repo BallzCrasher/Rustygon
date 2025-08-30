@@ -150,3 +150,25 @@ pub fn add_source(cpd: &Path, name: &str, from: Option<&Path>) -> Result<(), io:
     config.save_to_file(config_file)?;
     Ok(())
 }
+
+pub fn remove_source(cpd: &Path, name: &str) -> Result<(), io::Error> {
+    let config_file = File::open(cpd.join("problem_config.json"))?;
+    let mut config = ProblemConfig::from_file(config_file).unwrap();
+
+    let pos = config
+        .sources
+        .iter()
+        .position(|x| x.source.file_name().unwrap().eq(name))
+        .unwrap(); // TODO make it error
+
+    config.sources.remove(pos);
+    std::fs::remove_file(cpd.join("src/sources/").join(name))?;
+
+    let config_file = File::options()
+        .write(true)
+        .truncate(true)
+        .open(cpd.join("problem_config.json"))
+        .unwrap();
+    config.save_to_file(config_file)?;
+    Ok(())
+}
