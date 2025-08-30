@@ -1,5 +1,10 @@
-use crate::core::{create_problem_dir, is_valid_problem_name, reformat_valid_name};
-use crate::core::{ProblemConfig, SourceFile};
+use crate::core::{
+    create_problem_dir,
+    is_valid_problem_name,
+    reformat_valid_name,
+    add_source,
+    ProblemConfig, 
+};
 
 use std::env::current_dir;
 use std::fs::{copy, File, OpenOptions};
@@ -114,27 +119,16 @@ fn get_current_problem_directory() -> PathBuf {
 
 fn add_source_command(path: &Path) {
     let cpd = get_current_problem_directory();
-    let config_file = File::open(cpd.join("problem_config.json")).unwrap();
-    let mut config = ProblemConfig::from_file(config_file).unwrap();
 
     if path.exists() && path.is_file() {
-        copy(path, cpd.join("src/sources")).unwrap();
+        let filename = path.file_name().unwrap().to_str().unwrap();
+        add_source(&cpd, filename, Some(&path)).unwrap();
     } else if let Some(name) = path.file_name() {
-        let name = cpd.join("src/sources").join(name);
-        File::create(name).unwrap();
+        add_source(&cpd, name.to_str().unwrap(), None).unwrap();
     } else {
         eprintln!("Invalid input.");
         return;
     }
 
-    config.sources.push(SourceFile::from_filename(
-        PathBuf::from(path.file_name().unwrap()).as_path(),
-    ));
-
-    let config_file = File::options()
-        .write(true)
-        .open(cpd.join("problem_config.json"))
-        .unwrap();
-    config.save_to_file(config_file).unwrap();
     println!("Done");
 }

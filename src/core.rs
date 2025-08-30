@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::error::Error;
+use std::io;
 use std::{
-    fs::{create_dir, File, OpenOptions},
+    fs::{create_dir, copy, File, OpenOptions},
     path::{Path, PathBuf},
 };
 
@@ -28,7 +29,7 @@ pub fn reformat_valid_name(name: &str) -> String {
 /// problem/ # the problem directory
 /// -- problem_config.json
 /// -- src/  # the sources directory
-/// -- -- files/ # contains source files for generator and validator and checker
+/// -- -- sources/ # contains source files for generator and validator and checker
 /// -- -- solutions/ # contains the sources of the solutions
 /// -- testcases/ # the testcases
 /// -- -- input/ # the input of the testcases
@@ -51,6 +52,35 @@ pub fn create_problem_dir(path: &Path, config: &ProblemConfig) -> Result<(), Box
         .write(true)
         .open(path.join("problem_config.json"))?;
     Ok(config.save_to_file(file)?)
+}
+
+/// Adds a source file to the problem.
+///
+/// This will add the source file to "{cpd}/src/sources/{name}".
+/// if `from` is not None. This will copy the content of `from` to the added file.
+///
+/// * `cpd`  - The problem directory to which we want to add the source file
+/// * `name` - The name of the source file we add
+/// * `from` - if not None. the content of the source file will be copied from this file.
+pub fn add_source(cpd: &Path, name: &str, from: Option<&Path>) -> Result<(), io::Error>{
+    let config_file = File::open(cpd.join("problem_config.json"))?;
+    let mut config = ProblemConfig::from_file(config_file).unwrap();
+    let source_path = cpd.join("src/sources").join(name);
+
+    if let Some(path) = from {
+        copy(path, &source_path)?;
+    } else {
+        File::create(&source_path)?;
+    }
+
+    config.sources.push(SourceFile::from_filename(&source_path));
+
+    let config_file = File::options()
+        .write(true)
+        .open(cpd.join("problem_config.json"))
+        .unwrap();
+    config.save_to_file(config_file)?;
+    Ok(())
 }
 
 #[derive(Debug, Serialize, Deserialize)]
