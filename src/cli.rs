@@ -81,7 +81,12 @@ pub fn create_problem_command(name: String) {
     print!("Tags Saperated by commas (Default is Empty): ");
     stdout().flush().unwrap();
     let tags = read_input(String::new());
-    let tags: Vec<String> = tags.split(',').map(str::trim).map(str::to_string).collect();
+    let tags: Vec<String> = tags
+        .split(',')
+        .map(str::trim)
+        .filter(|x| !x.is_empty())
+        .map(str::to_string)
+        .collect();
 
     let path = current_dir().unwrap().join(&name);
 
