@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::io;
 use std::{
-    fs::{create_dir, copy, File, OpenOptions},
+    fs::{copy, create_dir, File, OpenOptions},
     path::{Path, PathBuf},
 };
 
@@ -62,7 +62,7 @@ pub fn create_problem_dir(path: &Path, config: &ProblemConfig) -> Result<(), Box
 /// * `cpd`  - The problem directory to which we want to add the source file
 /// * `name` - The name of the source file we add
 /// * `from` - if not None. the content of the source file will be copied from this file.
-pub fn add_source(cpd: &Path, name: &str, from: Option<&Path>) -> Result<(), io::Error>{
+pub fn add_source(cpd: &Path, name: &str, from: Option<&Path>) -> Result<(), io::Error> {
     let config_file = File::open(cpd.join("problem_config.json"))?;
     let mut config = ProblemConfig::from_file(config_file).unwrap();
     let source_path = cpd.join("src/sources").join(name);

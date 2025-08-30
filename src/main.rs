@@ -1,8 +1,5 @@
 use clap::Parser;
 use rustygon::cli::{handle_command, Command};
-use serde::{Deserialize, Serialize};
-use std::env::current_dir;
-use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None, arg_required_else_help=true)]
@@ -16,8 +13,8 @@ pub struct Cli {
 
     #[command(subcommand)]
     pub command: Option<Command>,
-}
-
+} 
+// TODO config
 //#[derive(Default,Serialize, Deserialize)]
 //struct Config {
 //}
