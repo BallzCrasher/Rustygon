@@ -6,6 +6,73 @@ use std::{
     path::{Path, PathBuf},
 };
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ProblemConfig {
+    pub title: String,
+    pub time: f32,
+    pub tags: Vec<String>,
+    pub testcases: Vec<Testcase>,
+    pub sources: Vec<SourceFile>,
+    pub solutions: Vec<Solution>,
+    pub validator: Option<usize>,
+    pub checker: Option<usize>,
+}
+
+impl ProblemConfig {
+    pub fn from_file(file: File) -> serde_json::Result<Self> {
+        serde_json::from_reader(file)
+    }
+
+    pub fn save_to_file(&self, file: File) -> serde_json::Result<()> {
+        serde_json::to_writer(file, self)
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Testcase {
+    pub input_path: PathBuf,
+    pub output_path: PathBuf,
+    pub generate: bool,
+    pub sample: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SourceFile {
+    pub source: PathBuf,
+    pub build_command: String,
+    pub exec_command: String,
+}
+
+impl SourceFile {
+    pub fn from_filename(filename: &Path) -> Self {
+        match filename.extension().map(|ext| ext.to_str().unwrap()) {
+            Some("cpp") => Self {
+                source: filename.to_path_buf(),
+                build_command: "g++ %source% -o %bin%".to_string(),
+                exec_command: String::new(),
+            },
+            None | Some(_) => Self {
+                source: filename.to_path_buf(),
+                build_command: String::new(),
+                exec_command: String::new(),
+            },
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum Verdict {
+    AC,
+    TLE,
+    WA,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Solution {
+    sourcefile: SourceFile,
+    verdict: Verdict,
+}
+
 pub fn is_valid_problem_name(name: &str) -> bool {
     name.chars()
         .all(|c| c.is_lowercase() || c.is_ascii_digit() || c == '-')
@@ -81,71 +148,4 @@ pub fn add_source(cpd: &Path, name: &str, from: Option<&Path>) -> Result<(), io:
         .unwrap();
     config.save_to_file(config_file)?;
     Ok(())
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ProblemConfig {
-    pub title: String,
-    pub time: f32,
-    pub tags: Vec<String>,
-    pub testcases: Vec<Testcase>,
-    pub sources: Vec<SourceFile>,
-    pub solutions: Vec<Solution>,
-    pub validator: Option<usize>,
-    pub checker: Option<usize>,
-}
-
-impl ProblemConfig {
-    pub fn from_file(file: File) -> serde_json::Result<Self> {
-        serde_json::from_reader(file)
-    }
-
-    pub fn save_to_file(&self, file: File) -> serde_json::Result<()> {
-        serde_json::to_writer(file, self)
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Testcase {
-    pub input_path: PathBuf,
-    pub output_path: PathBuf,
-    pub generate: bool,
-    pub sample: bool,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct SourceFile {
-    pub source: PathBuf,
-    pub build_command: String,
-    pub exec_command: String,
-}
-
-impl SourceFile {
-    pub fn from_filename(filename: &Path) -> Self {
-        match filename.extension().map(|ext| ext.to_str().unwrap()) {
-            Some("cpp") => Self {
-                source: filename.to_path_buf(),
-                build_command: "g++ %source% -o %bin%".to_string(),
-                exec_command: String::new(),
-            },
-            None | Some(_) => Self {
-                source: filename.to_path_buf(),
-                build_command: String::new(),
-                exec_command: String::new(),
-            },
-        }
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub enum Verdict {
-    AC,
-    TLE,
-    WA,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Solution {
-    sourcefile: SourceFile,
-    verdict: Verdict,
 }

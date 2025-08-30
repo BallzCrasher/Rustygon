@@ -13,7 +13,7 @@ pub struct Cli {
 
     #[command(subcommand)]
     pub command: Option<Command>,
-} 
+}
 // TODO config
 //#[derive(Default,Serialize, Deserialize)]
 //struct Config {
