@@ -197,3 +197,21 @@ pub fn add_solution(
     config.save_to_file(config_file)?;
     Ok(())
 }
+
+pub fn remove_solution(cpd: &Path, name: &str) -> Result<(), io::Error> {
+    let config_file = File::open(cpd.join("problem_config.json"))?;
+    let mut config = ProblemConfig::from_file(config_file).unwrap();
+
+    let pos = config
+        .solutions
+        .iter()
+        .position(|x| x.source.file_name().unwrap().eq(name))
+        .ok_or(io::ErrorKind::NotFound)?;
+
+    config.solutions.remove(pos);
+    std::fs::remove_file(cpd.join("src/solutions/").join(name))?;
+
+    let config_file = File::create(cpd.join("problem_config.json"))?;
+    config.save_to_file(config_file)?;
+    Ok(())
+}
