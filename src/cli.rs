@@ -1,6 +1,6 @@
 use crate::core::{
-    add_source, create_problem_dir, is_valid_problem_name, reformat_valid_name, remove_source,
-    ProblemConfig, Verdict, add_solution
+    add_solution, add_source, create_problem_dir, is_valid_problem_name, reformat_valid_name,
+    remove_source, ProblemConfig, Verdict,
 };
 
 use std::env::current_dir;
@@ -31,9 +31,11 @@ pub enum Element {
     Solution {
         path: PathBuf,
         #[arg(value_enum)]
-        verdict: Option<Verdict>
+        verdict: Option<Verdict>,
     },
-    Source { path: PathBuf }, // TODO: make it path: name
+    Source {
+        path: PathBuf,
+    }, // TODO: make it path: name
 }
 
 pub fn handle_command(command: Option<Command>) {

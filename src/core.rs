@@ -163,7 +163,6 @@ pub fn remove_source(cpd: &Path, name: &str) -> Result<(), io::Error> {
     Ok(())
 }
 
-
 /// Adds a solution file to the problem.
 ///
 /// This will add the solution file to "{cpd}/src/solutions/{name}".
@@ -173,7 +172,12 @@ pub fn remove_source(cpd: &Path, name: &str) -> Result<(), io::Error> {
 /// * `name` - The name of the source file we add
 /// * `from` - if not None. the content of the solution file will be copied from this file.
 /// * `verdict` - The expected verdict of the solution.
-pub fn add_solution(cpd: &Path, name: &str, from: Option<&Path>, verdict: Verdict) -> Result<(), io::Error> {
+pub fn add_solution(
+    cpd: &Path,
+    name: &str,
+    from: Option<&Path>,
+    verdict: Verdict,
+) -> Result<(), io::Error> {
     let config_file = File::open(cpd.join("problem_config.json"))?;
     let mut config = ProblemConfig::from_file(config_file)?;
     let source_path = cpd.join("src/solutions").join(name);
@@ -185,10 +189,9 @@ pub fn add_solution(cpd: &Path, name: &str, from: Option<&Path>, verdict: Verdic
     }
 
     config.solutions.push(Solution {
-            sourcefile: SourceFile::from_filename(&source_path),
-            verdict,
-        }
-    );
+        sourcefile: SourceFile::from_filename(&source_path),
+        verdict,
+    });
 
     let config_file = File::create(cpd.join("problem_config.json"))?;
     config.save_to_file(config_file)?;
