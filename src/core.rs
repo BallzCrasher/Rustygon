@@ -153,7 +153,7 @@ pub fn remove_source(cpd: &Path, name: &str) -> Result<(), io::Error> {
         .sources
         .iter()
         .position(|x| x.source.file_name().unwrap().eq(name))
-        .unwrap(); // TODO make it error
+        .ok_or(io::ErrorKind::NotFound)?;
 
     config.sources.remove(pos);
     std::fs::remove_file(cpd.join("src/sources/").join(name))?;
