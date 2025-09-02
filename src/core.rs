@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::io;
 use std::{
-    fs::{copy, create_dir, File, OpenOptions},
+    fs::{copy, create_dir, File},
     path::{Path, PathBuf},
 };
 
@@ -115,10 +115,7 @@ pub fn create_problem_dir(path: &Path, config: &ProblemConfig) -> Result<(), Box
     create_dir(path.join("text"))?;
     create_dir(path.join("bin"))?;
 
-    let file = OpenOptions::new()
-        .create(true)
-        .write(true)
-        .open(path.join("problem_config.json"))?;
+    let file = File::create(path.join("problem_config.json"))?;
     Ok(config.save_to_file(file)?)
 }
 
@@ -143,11 +140,7 @@ pub fn add_source(cpd: &Path, name: &str, from: Option<&Path>) -> Result<(), io:
 
     config.sources.push(SourceFile::from_filename(&source_path));
 
-    let config_file = File::options()
-        .write(true)
-        .truncate(true)
-        .open(cpd.join("problem_config.json"))
-        .unwrap();
+    let config_file = File::create(cpd.join("problem_config.json"))?;
     config.save_to_file(config_file)?;
     Ok(())
 }
@@ -165,11 +158,7 @@ pub fn remove_source(cpd: &Path, name: &str) -> Result<(), io::Error> {
     config.sources.remove(pos);
     std::fs::remove_file(cpd.join("src/sources/").join(name))?;
 
-    let config_file = File::options()
-        .write(true)
-        .truncate(true)
-        .open(cpd.join("problem_config.json"))
-        .unwrap();
+    let config_file = File::create(cpd.join("problem_config.json"))?;
     config.save_to_file(config_file)?;
     Ok(())
 }
@@ -186,7 +175,7 @@ pub fn remove_source(cpd: &Path, name: &str) -> Result<(), io::Error> {
 /// * `verdict` - The expected verdict of the solution.
 pub fn add_solution(cpd: &Path, name: &str, from: Option<&Path>, verdict: Verdict) -> Result<(), io::Error> {
     let config_file = File::open(cpd.join("problem_config.json"))?;
-    let mut config = ProblemConfig::from_file(config_file).unwrap();
+    let mut config = ProblemConfig::from_file(config_file)?;
     let source_path = cpd.join("src/solutions").join(name);
 
     if let Some(path) = from {
@@ -201,11 +190,7 @@ pub fn add_solution(cpd: &Path, name: &str, from: Option<&Path>, verdict: Verdic
         }
     );
 
-    let config_file = File::options()
-        .write(true)
-        .truncate(true)
-        .open(cpd.join("problem_config.json"))
-        .unwrap();
+    let config_file = File::create(cpd.join("problem_config.json"))?;
     config.save_to_file(config_file)?;
     Ok(())
 }
