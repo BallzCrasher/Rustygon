@@ -1,7 +1,6 @@
-use crate::core::{
-    add_solution, add_source, create_problem_dir, is_valid_problem_name, reformat_valid_name,
-    remove_solution, remove_source, ProblemConfig, Verdict,
-};
+use crate::core::solution::*;
+use crate::core::source::*;
+use crate::core::{create_problem_dir, is_valid_problem_name, reformat_valid_name, ProblemConfig};
 
 use std::env::current_dir;
 use std::fs::File;
