@@ -1,7 +1,6 @@
-use super::ProblemConfig;
+use super::{modify_config, GenericResult};
 use serde::{Deserialize, Serialize};
 use std::fs::{copy, File};
-use std::io;
 use std::path::{Path, PathBuf};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SourceFile {
@@ -35,38 +34,32 @@ impl SourceFile {
 /// * `cpd`  - The problem directory to which we want to add the source file
 /// * `name` - The name of the source file we add
 /// * `from` - if not None. the content of the source file will be copied from this file.
-pub fn add_source(cpd: &Path, name: &str, from: Option<&Path>) -> Result<(), io::Error> {
-    let config_file = File::open(cpd.join("problem_config.json"))?;
-    let mut config = ProblemConfig::from_file(config_file).unwrap();
-    let source_path = cpd.join("src/sources").join(name);
+pub fn add_source(cpd: &Path, name: &str, from: Option<&Path>) -> GenericResult {
+    modify_config(cpd, |config| {
+        let source_path = cpd.join("src/sources").join(name);
 
-    if let Some(path) = from {
-        copy(path, &source_path)?;
-    } else {
-        File::create_new(&source_path)?;
-    }
+        if let Some(path) = from {
+            copy(path, &source_path)?;
+        } else {
+            File::create_new(&source_path)?;
+        }
 
-    config.sources.push(SourceFile::from_filename(&source_path));
-
-    let config_file = File::create(cpd.join("problem_config.json"))?;
-    config.save_to_file(config_file)?;
-    Ok(())
+        config.sources.push(SourceFile::from_filename(&source_path));
+        Ok(())
+    })
 }
 
-pub fn remove_source(cpd: &Path, name: &str) -> Result<(), io::Error> {
-    let config_file = File::open(cpd.join("problem_config.json"))?;
-    let mut config = ProblemConfig::from_file(config_file).unwrap();
+pub fn remove_source(cpd: &Path, name: &str) -> GenericResult {
+    modify_config(cpd, |config| {
+        let pos = config
+            .sources
+            .iter()
+            .position(|x| x.source.file_name().unwrap().eq(name))
+            .ok_or(format!("{name} was not found in problem_config.json"))?;
 
-    let pos = config
-        .sources
-        .iter()
-        .position(|x| x.source.file_name().unwrap().eq(name))
-        .ok_or(io::ErrorKind::NotFound)?;
-
-    config.sources.remove(pos);
-    std::fs::remove_file(cpd.join("src/sources/").join(name))?;
-
-    let config_file = File::create(cpd.join("problem_config.json"))?;
-    config.save_to_file(config_file)?;
-    Ok(())
+        config.sources.remove(pos);
+        std::fs::remove_file(cpd.join("src/sources/").join(name))?;
+        Ok(())
+    })
 }
+

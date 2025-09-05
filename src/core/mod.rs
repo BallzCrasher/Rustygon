@@ -6,7 +6,6 @@ use solution::Solution;
 use source::SourceFile;
 use std::error::Error;
 use std::fs::{create_dir, File};
-use std::io;
 use std::path::{Path, PathBuf};
 
 type GenericResult = Result<(), Box<dyn Error>>;
