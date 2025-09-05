@@ -6,7 +6,10 @@ use solution::Solution;
 use source::SourceFile;
 use std::error::Error;
 use std::fs::{create_dir, File};
+use std::io;
 use std::path::{Path, PathBuf};
+
+type GenericResult = Result<(), Box<dyn Error>>;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ProblemConfig {
@@ -68,7 +71,7 @@ pub fn reformat_valid_name(name: &str) -> String {
 /// -- -- output/ # the output of the testcases
 /// -- text/ # contains all text files such as statement, tutorials, and testcases discriptions
 /// -- bin/ # contains all binary compiled from the source files
-pub fn create_problem_dir(path: &Path, config: &ProblemConfig) -> Result<(), Box<dyn Error>> {
+pub fn create_problem_dir(path: &Path, config: &ProblemConfig) -> GenericResult {
     create_dir(path)?;
     create_dir(path.join("src"))?;
     create_dir(path.join("src").join("sources"))?;
@@ -81,4 +84,18 @@ pub fn create_problem_dir(path: &Path, config: &ProblemConfig) -> Result<(), Box
 
     let file = File::create(path.join("problem_config.json"))?;
     Ok(config.save_to_file(file)?)
+}
+
+fn modify_config(
+    cpd: &Path,
+    mut f: impl FnMut(&mut ProblemConfig) -> GenericResult,
+) -> GenericResult {
+    let config_file = File::open(cpd.join("problem_config.json"))?;
+    let mut config = ProblemConfig::from_file(config_file).unwrap();
+
+    f(&mut config)?;
+
+    let config_file = File::create(cpd.join("problem_config.json"))?;
+    config.save_to_file(config_file)?;
+    Ok(())
 }
