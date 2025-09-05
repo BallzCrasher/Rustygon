@@ -1,8 +1,7 @@
 use super::source::SourceFile;
-use super::ProblemConfig;
+use super::{GenericResult, modify_config};
 use serde::{Deserialize, Serialize};
 use std::fs::{copy, File};
-use std::io;
 use std::path::Path;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize, clap::ValueEnum)]
@@ -33,41 +32,35 @@ pub fn add_solution(
     name: &str,
     from: Option<&Path>,
     verdict: Verdict,
-) -> Result<(), io::Error> {
-    let config_file = File::open(cpd.join("problem_config.json"))?;
-    let mut config = ProblemConfig::from_file(config_file)?;
-    let source_path = cpd.join("src/solutions").join(name);
+) -> GenericResult {
+    modify_config(cpd, |config| { 
+        let source_path = cpd.join("src/solutions").join(name);
+        if let Some(path) = from {
+            copy(path, &source_path)?;
+        } else {
+            File::create_new(&source_path)?;
+        }
 
-    if let Some(path) = from {
-        copy(path, &source_path)?;
-    } else {
-        File::create_new(&source_path)?;
-    }
+        config.solutions.push(Solution {
+            sourcefile: SourceFile::from_filename(&source_path),
+            verdict: verdict.clone(),
+        });
 
-    config.solutions.push(Solution {
-        sourcefile: SourceFile::from_filename(&source_path),
-        verdict,
-    });
-
-    let config_file = File::create(cpd.join("problem_config.json"))?;
-    config.save_to_file(config_file)?;
-    Ok(())
+        Ok(())
+    })
 }
 
-pub fn remove_solution(cpd: &Path, name: &str) -> Result<(), io::Error> {
-    let config_file = File::open(cpd.join("problem_config.json"))?;
-    let mut config = ProblemConfig::from_file(config_file).unwrap();
+pub fn remove_solution(cpd: &Path, name: &str) -> GenericResult {
+    return modify_config(cpd, |config| { 
+        let pos = config
+            .solutions
+            .iter()
+            .position(|x| x.sourcefile.source.file_name().unwrap().eq(name))
+            .ok_or(format!("{name} was not found in problem_config.json"))?;
 
-    let pos = config
-        .solutions
-        .iter()
-        .position(|x| x.sourcefile.source.file_name().unwrap().eq(name))
-        .ok_or(io::ErrorKind::NotFound)?;
+        config.solutions.remove(pos);
+        std::fs::remove_file(cpd.join("src/solutions/").join(name))?;
 
-    config.solutions.remove(pos);
-    std::fs::remove_file(cpd.join("src/solutions/").join(name))?;
-
-    let config_file = File::create(cpd.join("problem_config.json"))?;
-    config.save_to_file(config_file)?;
-    Ok(())
+        Ok(())
+    });
 }
