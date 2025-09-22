@@ -62,4 +62,3 @@ pub fn remove_source(cpd: &Path, name: &str) -> GenericResult {
         Ok(())
     })
 }
-

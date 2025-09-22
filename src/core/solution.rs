@@ -1,5 +1,5 @@
 use super::source::SourceFile;
-use super::{GenericResult, modify_config};
+use super::{modify_config, GenericResult};
 use serde::{Deserialize, Serialize};
 use std::fs::{copy, File};
 use std::path::Path;
@@ -33,7 +33,7 @@ pub fn add_solution(
     from: Option<&Path>,
     verdict: Verdict,
 ) -> GenericResult {
-    modify_config(cpd, |config| { 
+    modify_config(cpd, |config| {
         let source_path = cpd.join("src/solutions").join(name);
         if let Some(path) = from {
             copy(path, &source_path)?;
@@ -51,7 +51,7 @@ pub fn add_solution(
 }
 
 pub fn remove_solution(cpd: &Path, name: &str) -> GenericResult {
-    return modify_config(cpd, |config| { 
+    return modify_config(cpd, |config| {
         let pos = config
             .solutions
             .iter()
