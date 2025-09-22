@@ -16,16 +16,16 @@ pub enum Command {
     New { name: String },
     /// Adds a component to the problem
     #[command(subcommand)]
-    Add(Element),
+    Add(AddArg),
     /// Adds a component to the problem
     #[command(subcommand)]
-    Remove(Element),
+    Remove(RemoveArg),
     /// Info
     Info,
 }
 
 #[derive(Subcommand)]
-pub enum Element {
+pub enum AddArg {
     Statement,
     Solution {
         path: PathBuf,
@@ -37,6 +37,13 @@ pub enum Element {
     }, // TODO: make it path: name
 }
 
+#[derive(Subcommand)]
+pub enum RemoveArg {
+    Statement,
+    Solution { path: PathBuf },
+    Source { path: PathBuf }, // TODO: make it path: name
+}
+
 pub fn handle_command(command: Option<Command>) {
     match command {
         Some(Command::New { name }) => {
@@ -45,16 +52,16 @@ pub fn handle_command(command: Option<Command>) {
         Some(Command::Info) => {
             print_problem_info();
         }
-        Some(Command::Add(Element::Source { path })) => {
+        Some(Command::Add(AddArg::Source { path })) => {
             add_source_command(&path);
         }
-        Some(Command::Add(Element::Solution { path, verdict })) => {
+        Some(Command::Add(AddArg::Solution { path, verdict })) => {
             add_solution_command(&path, verdict);
         }
-        Some(Command::Remove(Element::Source { path })) => {
+        Some(Command::Remove(RemoveArg::Source { path })) => {
             remove_source_command(&path);
         }
-        Some(Command::Remove(Element::Solution { path, .. })) => {
+        Some(Command::Remove(RemoveArg::Solution { path })) => {
             // TODO: fix [verdict] showing
             // at the end
             remove_solution_command(&path);
