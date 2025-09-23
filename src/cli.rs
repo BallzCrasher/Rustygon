@@ -83,7 +83,7 @@ pub fn handle_command(command: Option<Command>) {
             // at the end
             remove_solution_command(&path);
         }
-        Some(Command::Set(SetArg::Validator { path })) => set_validator(cpd, name),
+        Some(Command::Set(SetArg::Validator { path })) => set_validator_command(&path),
         None => {}
         _ => unimplemented!(),
     }
@@ -208,8 +208,8 @@ fn remove_solution_command(path: &Path) {
     println!("Done");
 }
 
-fn set_validator_command(name: &str) {
+fn set_validator_command(name: &Path) {
     let cpd = get_current_problem_directory();
-    set_validator(&cpd, name).unwrap();
+    set_validator(&cpd, name.file_name().unwrap().to_str().unwrap()).unwrap();
     println!("Done");
 }
