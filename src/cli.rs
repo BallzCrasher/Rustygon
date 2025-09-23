@@ -19,7 +19,7 @@ pub enum Command {
     #[command(subcommand)]
     Add(AddArg),
 
-    /// Adds a component to the problem
+    /// Removes a component from the problem
     #[command(subcommand)]
     Remove(RemoveArg),
 
