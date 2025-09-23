@@ -14,12 +14,18 @@ use clap::Subcommand;
 pub enum Command {
     /// Creates new problem
     New { name: String },
+
     /// Adds a component to the problem
     #[command(subcommand)]
     Add(AddArg),
+
     /// Adds a component to the problem
     #[command(subcommand)]
     Remove(RemoveArg),
+
+    /// Sets a component or a setting
+    #[command(subcommand)]
+    Set(SetArg),
     /// Info
     Info,
 }
@@ -35,6 +41,17 @@ pub enum AddArg {
     Source {
         path: PathBuf,
     }, // TODO: make it path: name
+}
+
+#[derive(Subcommand)]
+pub enum SetArg {
+    Statement,
+    MainSolution { path: PathBuf },
+    Validator { path: PathBuf },
+    Title { title: String },
+    Time { time: f32 },
+    Checker { path: PathBuf },
+    Tags { tags: String },
 }
 
 #[derive(Subcommand)]
