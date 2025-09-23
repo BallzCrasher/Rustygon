@@ -62,3 +62,16 @@ pub fn remove_source(cpd: &Path, name: &str) -> GenericResult {
         Ok(())
     })
 }
+
+pub fn set_validator(cpd: &Path, name: &str) -> GenericResult {
+    modify_config(cpd, |config| {
+        let pos = config
+            .sources
+            .iter()
+            .position(|x| x.source.file_name().unwrap().eq(name))
+            .ok_or(format!("{name} was not found in problem_config.json"))?;
+
+        config.validator = Some(pos);
+        Ok(())
+    })
+}
