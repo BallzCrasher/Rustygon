@@ -2,11 +2,13 @@ use super::{modify_config, GenericResult};
 use serde::{Deserialize, Serialize};
 use std::fs::{copy, File};
 use std::path::{Path, PathBuf};
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct SourceFile {
     pub source: PathBuf,
-    pub build_command: String,
-    pub exec_command: String,
+    pub compiler: PathBuf,
+    pub compiler_args: Vec<String>,
+    pub bin: PathBuf,
+    pub bin_args: Vec<String>
 }
 
 impl SourceFile {
@@ -14,14 +16,12 @@ impl SourceFile {
         match filename.extension().map(|ext| ext.to_str().unwrap()) {
             Some("cpp") => Self {
                 source: filename.to_path_buf(),
-                build_command: "g++ %source% -o %bin%".to_string(),
-                exec_command: String::new(),
+                compiler: "g++".into(),
+                compiler_args: vec!["%source%".into(), "-o".into(), "%bin%".into()],
+                bin: filename.with_extension(".exe"),
+                bin_args: vec![]
             },
-            None | Some(_) => Self {
-                source: filename.to_path_buf(),
-                build_command: String::new(),
-                exec_command: String::new(),
-            },
+            None | Some(_) => Self::default()
         }
     }
 }
