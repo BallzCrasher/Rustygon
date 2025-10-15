@@ -147,9 +147,16 @@ pub fn create_problem_command(name: String) {
 pub fn print_problem_info() {
     let problem_path = get_current_problem_directory();
     let problem_config_path = problem_path.join("problem_config.json");
-    let problem_config = ProblemConfig::from_file(File::open(problem_config_path).unwrap());
+    let problem_config =
+        ProblemConfig::from_file(File::open(problem_config_path).unwrap()).unwrap();
 
-    println!("{:?}", problem_config);
+    println!("Title: {}", problem_config.title);
+    println!("Time: {}", problem_config.time);
+    println!("Tags: {:?}", problem_config.tags);
+    println!("Sources: {:?}", problem_config.sources);
+    println!("Solutions: {:?}", problem_config.solutions);
+    println!("Checker: {:?}", problem_config.checker);
+    println!("Validator: {:?}", problem_config.validator);
 }
 
 fn get_current_problem_directory() -> PathBuf {
