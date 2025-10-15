@@ -14,8 +14,8 @@ pub enum Verdict {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Solution {
-    sourcefile: SourceFile,
-    verdict: Verdict,
+    pub sourcefile: SourceFile,
+    pub verdict: Verdict,
 }
 
 /// Adds a solution file to the problem.

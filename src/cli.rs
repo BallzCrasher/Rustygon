@@ -26,9 +26,26 @@ pub enum Command {
     /// Sets a component or a setting
     #[command(subcommand)]
     Set(SetArg),
+
+    /// Builds a Solution or Source File
+    #[command(subcommand)]
+    Build(BuildArg),
+
     /// Info
     Info,
 }
+
+#[derive(Subcommand)]
+pub enum BuildArg {
+    Solution {
+        path: PathBuf,
+    },
+    Source {
+        path: PathBuf,
+    },
+    All,
+}
+
 
 #[derive(Subcommand)]
 pub enum AddArg {
@@ -84,6 +101,7 @@ pub fn handle_command(command: Option<Command>) {
             remove_solution_command(&path);
         }
         Some(Command::Set(SetArg::Validator { path })) => set_validator_command(&path),
+        Some(Command::Build(BuildArg::All)) => build_all_command(),
         None => {}
         _ => unimplemented!(),
     }
@@ -219,4 +237,21 @@ fn set_validator_command(name: &Path) {
     let cpd = get_current_problem_directory();
     set_validator(&cpd, name.file_name().unwrap().to_str().unwrap()).unwrap();
     println!("Done");
+}
+
+fn build_all_command() {
+    let cpd = get_current_problem_directory();
+    let config = ProblemConfig::from_file(File::open(cpd.join("problem_config.json")).unwrap()).unwrap();
+
+    for solution in config.solutions {
+        print!("Building {:#?}...", solution.sourcefile.source.file_name().unwrap());
+        solution.sourcefile.build(&cpd).unwrap();
+        println!("Done");
+    }
+    
+    for source in config.sources {
+        print!("Building {:#?}...", source.source.file_name().unwrap());
+        source.build(&cpd).unwrap();
+        println!("Done");
+    }
 }

@@ -1,7 +1,10 @@
 use super::{modify_config, GenericResult};
+use bstr::ByteSlice;
+use std::ffi::OsString;
 use serde::{Deserialize, Serialize};
 use std::fs::{copy, File};
 use std::path::{Path, PathBuf};
+
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct SourceFile {
     pub source: PathBuf,
@@ -18,11 +21,35 @@ impl SourceFile {
                 source: filename.to_path_buf(),
                 compiler: "g++".into(),
                 compiler_args: vec!["%source%".into(), "-o".into(), "%bin%".into()],
-                bin: filename.with_extension("exe"),
+                bin: filename.with_extension("exe").file_name().unwrap().into(),
                 bin_args: vec![]
             },
             None | Some(_) => Self::default()
         }
+    }
+
+    pub fn build(&self, cpd: &Path) -> std::io::Result<()>  {
+        let args = self.compiler_args.iter().map(|s| {
+            match s.as_str() {
+                "%source%" => OsString::from(&self.source),
+                "%bin%" => OsString::from(cpd.join("bin").join(&self.bin)),
+                e => OsString::from(e)
+            }
+        });
+
+        let output = std::process::Command::new(&self.compiler)
+            .args(args)
+            .output()?;
+
+        if !output.status.success() {
+            eprintln!("Process exited with code: {:?}", output.status.code());
+            eprintln!("=============");
+            eprintln!("stderr: {}", output.stderr.to_str_lossy());
+            eprintln!("=============");
+            eprintln!("stdout: {}", output.stdout.to_str_lossy());
+            eprintln!("=============");
+        }
+        Ok(())
     }
 }
 
