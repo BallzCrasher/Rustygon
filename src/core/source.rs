@@ -1,6 +1,7 @@
 use super::{modify_config, GenericResult};
 use bstr::ByteSlice;
 use std::ffi::OsString;
+use std::io;
 use serde::{Deserialize, Serialize};
 use std::fs::{copy, File};
 use std::path::{Path, PathBuf};
@@ -29,10 +30,17 @@ impl SourceFile {
     }
 
     pub fn build(&self, cpd: &Path) -> std::io::Result<()>  {
+        let bin_path = cpd.join("bin").join(&self.bin);
+
+        if !more_recent(&self.source, &bin_path).unwrap() {
+            print!("Source is more recent than binary. Skipping...");
+            return Ok(());
+        }
+
         let args = self.compiler_args.iter().map(|s| {
             match s.as_str() {
                 "%source%" => OsString::from(&self.source),
-                "%bin%" => OsString::from(cpd.join("bin").join(&self.bin)),
+                "%bin%" => OsString::from(&bin_path),
                 e => OsString::from(e)
             }
         });
@@ -51,6 +59,20 @@ impl SourceFile {
         }
         Ok(())
     }
+}
+
+fn more_recent(source: &Path, binary: &Path) -> io::Result<bool> {
+
+    assert!(source.exists());
+
+    if !binary.exists() {
+        return Ok(false);
+    }
+
+    let stime = source.metadata()?.modified()?;
+    let btime = binary.metadata()?.modified()?;
+
+    Ok(stime > btime)
 }
 
 /// Adds a source file to the problem.
