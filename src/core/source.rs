@@ -18,7 +18,7 @@ impl SourceFile {
                 source: filename.to_path_buf(),
                 compiler: "g++".into(),
                 compiler_args: vec!["%source%".into(), "-o".into(), "%bin%".into()],
-                bin: filename.with_extension(".exe"),
+                bin: filename.with_extension("exe"),
                 bin_args: vec![]
             },
             None | Some(_) => Self::default()
