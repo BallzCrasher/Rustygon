@@ -37,15 +37,10 @@ pub enum Command {
 
 #[derive(Subcommand)]
 pub enum BuildArg {
-    Solution {
-        path: PathBuf,
-    },
-    Source {
-        path: PathBuf,
-    },
+    Solution { path: PathBuf },
+    Source { path: PathBuf },
     All,
 }
-
 
 #[derive(Subcommand)]
 pub enum AddArg {
@@ -102,6 +97,8 @@ pub fn handle_command(command: Option<Command>) {
         }
         Some(Command::Set(SetArg::Validator { path })) => set_validator_command(&path),
         Some(Command::Build(BuildArg::All)) => build_all_command(),
+        Some(Command::Build(BuildArg::Solution { path })) => build_solution_command(&path),
+        Some(Command::Build(BuildArg::Source { path })) => build_source_command(&path),
         None => {}
         _ => unimplemented!(),
     }
@@ -241,17 +238,64 @@ fn set_validator_command(name: &Path) {
 
 fn build_all_command() {
     let cpd = get_current_problem_directory();
-    let config = ProblemConfig::from_file(File::open(cpd.join("problem_config.json")).unwrap()).unwrap();
+    let config =
+        ProblemConfig::from_file(File::open(cpd.join("problem_config.json")).unwrap()).unwrap();
 
     for solution in config.solutions {
-        print!("Building {:#?}...", solution.sourcefile.source.file_name().unwrap());
+        print!(
+            "Building {:#?}...",
+            solution.sourcefile.source.file_name().unwrap()
+        );
         solution.sourcefile.build(&cpd).unwrap();
         println!("Done");
     }
-    
+
     for source in config.sources {
         print!("Building {:#?}...", source.source.file_name().unwrap());
         source.build(&cpd).unwrap();
         println!("Done");
     }
+}
+
+fn build_solution_command(solution: &Path) {
+    let cpd = get_current_problem_directory();
+    let config =
+        ProblemConfig::from_file(File::open(cpd.join("problem_config.json")).unwrap()).unwrap();
+
+    config
+        .solutions
+        .iter()
+        .find(|item| item.sourcefile.source.file_name().eq(&solution.file_name()))
+        .unwrap_or_else(|| {
+            eprintln!(
+                "{:#?} is not found in problem_config.json",
+                solution.file_name()
+            );
+            panic!("An Error has occoured");
+        })
+        .sourcefile
+        .build(&cpd)
+        .unwrap();
+    println!("Done");
+}
+
+fn build_source_command(source: &Path) {
+    let cpd = get_current_problem_directory();
+    let config =
+        ProblemConfig::from_file(File::open(cpd.join("problem_config.json")).unwrap()).unwrap();
+
+    config
+        .sources
+        .iter()
+        .find(|item| item.source.file_name().eq(&source.file_name()))
+        .unwrap_or_else(|| {
+            eprintln!(
+                "{:#?} is not found in problem_config.json",
+                source.file_name()
+            );
+            panic!("An Error has occoured");
+        })
+        .build(&cpd)
+        .unwrap();
+    println!("Done");
 }
