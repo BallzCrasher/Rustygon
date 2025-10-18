@@ -31,6 +31,10 @@ pub enum Command {
     #[command(subcommand)]
     Build(BuildArg),
 
+    /// Run a Program
+    #[command(subcommand)]
+    Run(BuildArg), // TODO: make it its own enum
+
     /// Info
     Info,
 }
@@ -99,6 +103,8 @@ pub fn handle_command(command: Option<Command>) {
         Some(Command::Build(BuildArg::All)) => build_all_command(),
         Some(Command::Build(BuildArg::Solution { path })) => build_solution_command(&path),
         Some(Command::Build(BuildArg::Source { path })) => build_source_command(&path),
+        Some(Command::Run(BuildArg::Solution { path })) => run_solution_command(&path),
+        Some(Command::Run(BuildArg::Source { path })) => run_source_command(&path),
         None => {}
         _ => unimplemented!(),
     }
@@ -296,6 +302,49 @@ fn build_source_command(source: &Path) {
             panic!("An Error has occoured");
         })
         .build(&cpd)
+        .unwrap();
+    println!("Done");
+}
+
+fn run_source_command(source: &Path) {
+    let cpd = get_current_problem_directory();
+    let config =
+        ProblemConfig::from_file(File::open(cpd.join("problem_config.json")).unwrap()).unwrap();
+
+    config
+        .sources
+        .iter()
+        .find(|item| item.source.file_name().eq(&source.file_name()))
+        .unwrap_or_else(|| {
+            eprintln!(
+                "{:#?} is not found in problem_config.json",
+                source.file_name()
+            );
+            panic!("An Error has occoured");
+        })
+        .run(&cpd)
+        .unwrap();
+    println!("Done");
+}
+
+fn run_solution_command(source: &Path) {
+    let cpd = get_current_problem_directory();
+    let config =
+        ProblemConfig::from_file(File::open(cpd.join("problem_config.json")).unwrap()).unwrap();
+
+    config
+        .solutions
+        .iter()
+        .find(|item| item.sourcefile.source.file_name().eq(&source.file_name()))
+        .unwrap_or_else(|| {
+            eprintln!(
+                "{:#?} is not found in problem_config.json",
+                source.file_name()
+            );
+            panic!("An Error has occoured");
+        })
+        .sourcefile
+        .run(&cpd)
         .unwrap();
     println!("Done");
 }

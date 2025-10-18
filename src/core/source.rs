@@ -2,6 +2,7 @@ use super::{modify_config, GenericResult};
 use bstr::ByteSlice;
 use std::ffi::OsString;
 use std::io;
+use std::process::ExitStatus;
 use serde::{Deserialize, Serialize};
 use std::fs::{copy, File};
 use std::path::{Path, PathBuf};
@@ -58,6 +59,14 @@ impl SourceFile {
             eprintln!("=============");
         }
         Ok(())
+    }
+
+    pub fn run(&self, cpd: &Path) -> io::Result<ExitStatus>{
+        let bin_path = cpd.join("bin").join(&self.bin);
+        Ok(std::process::Command::new(bin_path)
+            .args(self.bin_args.iter())
+            .spawn()?
+            .wait()?)
     }
 }
 
